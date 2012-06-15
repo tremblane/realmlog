@@ -1,1 +1,48 @@
 #!/bin/bash
+
+if [[ "$HOSTNAME" != "clue" ]]; then
+        echo "Must be run on clue."
+        exit
+fi
+
+if [ -z $1 ]; then
+	echo "Please specify realm to check"
+	echo "-dt   Desktop"
+	echo "-lab  Lab"
+	echo "-ecs  ECS"
+	exit
+else if [ $1 == "-dt" ]; then
+	REALM="dt"
+else if [ $1 == "-lab" ]; then
+	REALM="lab"
+else if [ $1 == "-ecs" ]; then
+	REALM="dc"
+else
+	echo "Invalid parameter"
+	echo "Please specify realm to check"
+	echo "-dt   Desktop"
+	echo "-lab  Lab"
+	echo "-ecs  ECS"
+	exit
+   fi
+  fi
+ fi
+fi
+
+PATH="/auto/ecs-sfo/backups/sfo.$REALM.*"
+
+INDEX=0
+
+for FILE in `/bin/ls -1 $PATH | /bin/sort`
+do
+	#echo File: $FILE
+	FILES[$INDEX]=$FILE
+	#echo Array pos $INDEX : ${FILES[$INDEX]}
+	MAX=$INDEX
+	INDEX=$[INDEX+1]
+done
+
+for (( X=1; X<=$MAX; X++ ))
+do
+	/router/bin/diff <(/bin/sort ${FILES[$[X]]}) <(/bin/sort ${FILES[$[X-1]]}) | /router/bin/egrep '<|>' | /bin/sed 's/</add/g' | /bin/sed 's/>/del/g' | /bin/sed 's/\.cisco\.com//g' | /router/bin/xargs -i{} /bin/echo ${FILES[$[X]]} {}
+done
