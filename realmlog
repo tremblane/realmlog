@@ -44,5 +44,5 @@ done
 
 for (( X=1; X<=$MAX; X++ ))
 do
-	/router/bin/diff <(/bin/sort ${FILES[$[X]]}) <(/bin/sort ${FILES[$[X-1]]}) | /router/bin/egrep '<|>' | /bin/sed 's/</add/g' | /bin/sed 's/>/del/g' | /bin/sed 's/\.cisco\.com//g' | /router/bin/xargs -i{} /bin/echo ${FILES[$[X]]} {}
+	/router/bin/diff <(/bin/sort ${FILES[$[X]]}) <(/bin/sort ${FILES[$[X-1]]}) | /router/bin/egrep '<|>' | /bin/sed 's/</add/g' | /bin/sed 's/>/del/g' | /bin/sed 's/\.cisco\.com//g' | /router/bin/xargs -i{} /bin/echo `echo ${FILES[$[X-1]]} | /bin/awk -F'.' '{print $NF}'` {}
 done
